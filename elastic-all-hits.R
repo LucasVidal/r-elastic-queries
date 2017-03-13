@@ -1,3 +1,5 @@
+source('~/workspace/r-studio/mappings.R')
+
 start <- function() {
   library("elastic") 
   library('httr')
@@ -21,3 +23,11 @@ do_it <- function() {
   search_all_hits(index="events-*", q="event:keychain_item_not_found")
 }
 
+# Call it like this: apply_map_to_event(map_functions(), e)
+apply_map_to_event <- function(map, event) {
+  result <- list()
+  for (f in map) {
+    result <- c(result, f(event))
+  }
+  result
+}
