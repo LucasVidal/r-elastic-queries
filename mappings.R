@@ -4,7 +4,7 @@ apply_map_to_event <- function(function_vector, event) {
   for (f in function_vector) {
     result <- c(result, f(event))
   }
-  data.frame(result)
+  unlist(result)
 }
 
 # 2 x N matrix, firts column is name, second is trasformation partial function
