@@ -1,5 +1,13 @@
-# 2 x N matrix, firts column is name, second is trasformation partial function
+# Call it like this: apply_map_to_event(map_functions()[,2], e)
+apply_map_to_event <- function(function_vector, event) {
+  result <- list()
+  for (f in function_vector) {
+    result <- c(result, f(event))
+  }
+  data.frame(result)
+}
 
+# 2 x N matrix, firts column is name, second is trasformation partial function
 map_functions <- function() {
   matrix(
     c(

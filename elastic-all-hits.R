@@ -1,33 +1,19 @@
 source('~/workspace/r-studio/mappings.R')
+source('~/workspace/r-studio/connection.R')
+source('~/workspace/r-studio/output.R')
 
-start <- function() {
-  library("elastic") 
-  library('httr')
-  connect("search-authy-logs-production-wqgtexkfcofbtsi75ljdfkr5ke.us-east-1.es.amazonaws.com", es_transport_schema = "https", es_port = 443)
-}
-
-search_all_hits <- function(index, query, fields) {
-  res <- Search(index = index, q=query, scroll="5m", search_type = "scan", config=verbose())
-  out <- list()
-  hits <- 1
-  while(hits != 0){
-    res <- scroll(scroll_id = res$`_scroll_id`, config=verbose())
-    hits <- length(res$hits$hits)
-    if(hits > 0)
-      out <- c(out, res$hits$hits)
+main <- function(query) {
+  if (is.null(query)) { # To reload the data without querying again elasticsearch, just send it again as parameter
+    query <- search_all_hits(index="events-*", q="event:keychain_item_not_found")
   }
-  out
-}
+  
+  # Mapping function, only resolved once for performance
+  map_f <- map_functions()
 
-do_it <- function() {
-  search_all_hits(index="events-*", q="event:keychain_item_not_found")
-}
-
-# Call it like this: apply_map_to_event(map_functions(), e)
-apply_map_to_event <- function(map, event) {
-  result <- list()
-  for (f in map) {
-    result <- c(result, f(event))
+  df <- dataframe_with_names(map_f[,1])
+  for (e in query) {
+    dr <- data.frame(apply_map_to_event(map_f[,2], e))
+    rbind(df,dr)
   }
-  result
+  df
 }
